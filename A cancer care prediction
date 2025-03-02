@@ -1,0 +1,54 @@
+# Import necessary libraries
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+# STEP 1: Upload the dataset in Google Colab
+from google.colab import files
+uploaded = files.upload()  # Manually upload 'cancer.csv'
+# STEP 2: Load the dataset
+df = pd.read_csv("/content/cancer.csv")
+# Display column names to check for the target variable
+print("Column Names in Dataset:", df.columns)
+# STEP 3: Handle missing values (if any)
+df = df.dropna()  # Remove rows with missing values
+# STEP 4: Convert categorical columns to numeric
+label_encoders = {}
+for col in df.select_dtypes(include=['object']).columns:  # Find categorical columns
+    label_encoders[col] = LabelEncoder()
+    df[col] = label_encoders[col].fit_transform(df[col])  # Convert text to numbers
+# STEP 5: Define Features (X) and Target (y)
+target_column = 'Total.Number'  # Change this if a different column is needed
+# Convert the target into binary classes (e.g., High vs. Low Cancer Cases)
+df['target'] = (df[target_column] > df[target_column].median()).astype(int)
+X = df.drop(columns=[target_column, 'target'])  # Drop target and original numeric label
+y = df['target']  # Binary target (0 = Low, 1 = High)
+# STEP 6: Split dataset into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# STEP 7: Standardize numeric features (scale values)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+# STEP 8: Build Neural Network Model
+model = Sequential([
+    Dense(32, activation='relu', input_shape=(X_train.shape[1],)),
+    Dropout(0.2),
+    Dense(16, activation='relu'),
+    Dense(1, activation='sigmoid')  # Binary classification (High/Low Cancer Cases)
+])
+# STEP 9: Compile the model
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+# STEP 10: Train the model
+model.fit(X_train, y_train, epochs=50, batch_size=16, validation_data=(X_test, y_test))
+# STEP 11: Evaluate the model
+loss, accuracy = model.evaluate(X_test, y_test)
+print(f"\n✅ Model Test Accuracy: {accuracy * 100:.2f}%")
+# STEP 12: Make a prediction (Example)
+sample = np.array([X_test[0]])  # Use the first test sample
+prediction = model.predict(sample)
+predicted_label = "High" if prediction[0][0] > 0.5 else "Low"
+print(f"\n🩺 Prediction for sample: {predicted_label}")
