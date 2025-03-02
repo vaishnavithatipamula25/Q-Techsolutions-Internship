@@ -1,0 +1,73 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+# Load dataset (Replace with your dataset)
+df = pd.read_csv("/content/house-prices.csv")  # Change to your dataset file
+print(df.head())
+# Check for missing values
+print(df.isnull().sum())
+# Describe dataset statistics
+print(df.describe())
+# Plot price distribution
+sns.histplot(df['Price'], bins=50, kde=True)
+plt.show()
+# Remove missing values
+df.dropna(inplace=True)
+# Encode categorical variables (if any)
+df = pd.get_dummies(df, drop_first=True)
+# Separate features and target
+X = df.drop(columns=['Price'])  # Independent variables
+y = df['Price']  # Dependent variable (House Price)
+# Split into training & test sets (80% train, 20% test)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Scale data for better performance
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+# Train a Random Forest model
+rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
+rf_model.fit(X_train, y_train)
+# Make predictions
+y_pred = rf_model.predict(X_test)
+# Evaluate model performance
+print(f"MAE: {mean_absolute_error(y_test, y_pred):.2f}")
+print(f"RMSE: {np.sqrt(mean_squared_error(y_test, y_pred)):.2f}")
+print(f"R2 Score: {r2_score(y_test, y_pred):.2f}")
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+# Example new house data (adjust this to match your dataset)
+new_house = np.array([[1790, 2, 2, 2]])  # 1790 sqft, 2 bedrooms, 2 bathrooms, 2 garage spaces
+# Ensure new_house has the same number of features as X_train
+# For demonstration, let's assume the full training data had 8 features including categorical encoding
+# Add additional columns with zero values for missing features (you should match actual feature names)
+new_house_full = np.hstack([new_house, np.zeros((new_house.shape[0], 4))])  # Assuming 4 missing features
+# Convert new house data to DataFrame with correct feature names (including dummy variables if necessary)
+feature_names = ["sqft", "bedrooms", "bathrooms", "garage", "Neighborhood_North", "Neighborhood_South", "Brick_Yes", "Home"]
+new_house_df = pd.DataFrame(new_house_full, columns=feature_names)
+# Fit the scaler on X_train (ensure that X_train is correctly preprocessed)
+scaler = StandardScaler()
+scaler.fit(X_train)  # Fit on training data (which should have 8 features)
+# Standardize using the pre-fitted scaler
+new_house_scaled = scaler.transform(new_house_df)
+# Predict using Random Forest (assuming rf_model was trained previously)
+try:
+    rf_price = rf_model.predict(new_house_scaled)
+    print(f"Predicted Price (Random Forest): ${rf_price[0]:,.2f}")
+except Exception as e:
+    print("Error during Random Forest prediction:", e)
+
+# Predict using Neural Network (assuming model was trained previously)
+try:
+    nn_price = model.predict(new_house_scaled)
+    print(f"Predicted Price (Neural Network): ${nn_price[0][0]:,.2f}")
+except Exception as e:
+    print("Error during Neural Network prediction:", e)
