@@ -1,0 +1,22 @@
+def calculate_loan(principal, annual_interest_rate, years):
+    # Convert annual interest rate to a monthly rate
+    monthly_interest_rate = annual_interest_rate / 100 / 12
+    # Calculate number of payments
+    num_payments = years * 12
+    # Calculate the monthly payment using the formula
+    monthly_payment = principal * (monthly_interest_rate * (1 + monthly_interest_rate) ** num_payments) / ((1 + monthly_interest_rate) ** num_payments - 1)
+    # Calculate total payment over the life of the loan
+    total_payment = monthly_payment * num_payments
+    # Calculate total interest paid
+    total_interest = total_payment - principal
+    return monthly_payment, total_payment, total_interest
+# Input from user
+principal = float(input("Enter the loan amount (Principal): "))
+annual_interest_rate = float(input("Enter the annual interest rate (in percentage): "))
+years = int(input("Enter the loan duration in years: "))
+# Calculate loan details
+monthly_payment, total_payment, total_interest = calculate_loan(principal, annual_interest_rate, years)
+# Display results
+print(f"\nMonthly Payment: ${monthly_payment:.2f}")
+print(f"Total Payment: ${total_payment:.2f}")
+print(f"Total Interest Paid: ${total_interest:.2f}")
